@@ -12,7 +12,7 @@ Font Overview window’s width also slightly changes, because they can be floats
 
 * In Single-Window mode, panel resize does not fit perfectly on first button press.
 * In Multi-Window mode, you may experience the same issue. If so, make sure your `System Preferences > General > Show scroll bars` does not read `Automatically based on mouse or trackpad`.
-* Glyph cell width cannot be float. Window/panel width can though, so that width has to change to meet the total width of the 
+* Glyph cell width cannot be float. Window/panel width can though, so that width has to change to meet the total width of the collective glyph cells.
 * If you have open fonts and change your SWM preference, you may experience weird window/panel behavior unless you restart.
 
 
