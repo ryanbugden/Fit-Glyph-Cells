@@ -14,7 +14,6 @@ class fitGlyphCells(object):
     
     Ryan Bugden
     2020.04.03
-    Special thanks to Frederik Berlaen & Gustavo Ferreira
     '''
 
     def __init__(self):
