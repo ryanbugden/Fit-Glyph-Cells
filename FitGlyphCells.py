@@ -7,12 +7,14 @@ from lib.tools.defaults import getDefault
 from vanilla import ImageButton
 
 class fitGlyphCells(object):
+    
     '''
     Scale the glyph cells in Font Overview as large as 
     they can be while justfied to the width of the frame.
     
     Ryan Bugden
-    2020.04.3
+    2020.04.03
+    Special thanks to Frederik Berlaen & Gustavo Ferreira
     '''
 
     def __init__(self):
@@ -22,7 +24,6 @@ class fitGlyphCells(object):
         addObserver(self, "menu", "fontOverviewAdditionContextualMenuItems")
 
     def addButton(self, notification):
-        
         self.sb = CurrentFontWindow().fontOverview.statusBar
         path = self.resources_path + '/_icon_Fit.pdf'
 
@@ -49,29 +50,25 @@ class fitGlyphCells(object):
         notification["additionContextualMenuItems"].extend(myMenuItems)
 
     def resize(self, sender):
-        fo = CurrentFontWindow().fontOverview
+        fw = CurrentFontWindow()
+        fo = fw.fontOverview
         v = fo.getGlyphCollection().getGlyphCellView()
-
 
         # make cells small first
         starter = 10
         v.setCellSize_([starter, starter])
-        # # need to recalculate frame (I assume this has to do with the scrollbar)
-        # v.recalculateFrame()
 
         # get the width of the cell view
-        vw = v.frameSize().width
-        vh = v.frameSize().height
-
+        vw, vh = v.frameSize().width, v.frameSize().height
+        
         # get number of glyphs
         num_g = len(fo.getGlyphOrder())
 
-        print("vw ",  vw)
-        print("vh ",  vh)
-        print("num g ",  num_g)
+        # print("vw ",  vw)
+        # print("vh ",  vh)
+        # print("num g ",  num_g)
 
         cells_across = 1
-        extra_row = 0
         cw = int(vw / cells_across)
         while ((num_g) / cells_across) * cw > vh:
             cells_across += 1
@@ -79,16 +76,17 @@ class fitGlyphCells(object):
     
         vw = cw * cells_across
 
-        print("cells across ",  cells_across)
-        print("cw ",  cw)
-        print("ch ",  ch)
-        print("vw ", vw)
-
+        # print("cells across ",  cells_across)
+        # print("cw ",  cw)
+        # print("ch ",  ch)
+        # print("vw ", vw)
+        
         # set frame size
         if getDefault("singleWindowMode") == 1:
-            v.recalculateFrame()
-            x, y, w, h = fo.getPosSize()
-            fo.setPosSize((x, y, vw, h))
+            x, y, w, h = fw.window().getPosSize()
+            fw.editor.splitView.setDimension('fontOverview', vw)
+            fw.editor.splitView.setDimension('glyphView', w - vw)
+            fw.centerGlyphInView()
         else:
             windows = NSApp().orderedWindows()
             (x, y), (w, h) =  windows[0].frame()
