@@ -49,6 +49,8 @@ class fitGlyphCells(Subscriber):
         info["itemDescriptions"].extend(myMenuItems)
 
     def resize(self, sender):
+        swm = getDefault("singleWindowMode")
+        
         fw = CurrentFontWindow()
         fo = fw.fontOverview
         v = fo.getGlyphCollection().getGlyphCellView()
@@ -56,9 +58,18 @@ class fitGlyphCells(Subscriber):
         # make cells small first
         starter = 10
         v.setCellSize_([starter, starter])
+        
+        # get the width of the whole window
+        x, y, w, h = fw.window().getPosSize()
 
         # get the width of the cell view
         vw, vh = v.frameSize().width, v.frameSize().height
+        
+        # get the width of overall font overview
+        fo_w = fo.getNSView().frameSize().width
+        
+        # get the width of the sets menu to the left of the font overview
+        sets_w = fo_w - vw
         
         # get number of glyphs
         num_g = len(fo.getGlyphOrder())
@@ -67,6 +78,8 @@ class fitGlyphCells(Subscriber):
         print("vw ",  vw)
         print("vh ",  vh)
         print("num g ",  num_g)
+        print("w ", sets_w)
+        print("sets_w ", sets_w)
         
         cells_across = 1
         cw = int(vw / cells_across)
@@ -77,22 +90,24 @@ class fitGlyphCells(Subscriber):
         vw = cw * cells_across
         
         # debug
+        print()
         print("cells across ",  cells_across)
         print("cw ",  cw)
         print("ch ",  ch)
         print("vw ", vw)
+        print("sets_w ", sets_w)
+        fo_total_w = vw + sets_w
         
         # set frame size
-        if getDefault("singleWindowMode") == 1:
-            x, y, w, h = fw.window().getPosSize()
-            fw.editor.splitView.setDimension('fontOverview', vw)
-            fw.editor.splitView.setDimension('glyphView', w - vw)
+        if swm == 1:
+            fw.editor.splitView.setDimension('fontOverview', fo_total_w)
+            fw.editor.splitView.setDimension('glyphView', w - fo_total_w)
             fw.centerGlyphInView()
         else:
             windows = NSApp().orderedWindows()
             (x, y), (w, h) =  windows[0].frame()
             x_diff = w - vw
-            windows[0].setFrame_display_animate_(((x + x_diff, y), (vw, h)), True, False)
+            windows[0].setFrame_display_animate_(((x + x_diff, y), (fo_total_w, h)), True, False)
     
         # do it
         v.setCellSize_([cw, ch])
