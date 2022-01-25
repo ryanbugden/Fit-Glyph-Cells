@@ -20,7 +20,6 @@ class fitGlyphCells(Subscriber):
     '''
 
     def started(self):
-        self.i = 0
         self.resize(None)
 
     def fontOverviewDidOpen(self, info):
@@ -49,7 +48,7 @@ class fitGlyphCells(Subscriber):
         info["itemDescriptions"].extend(myMenuItems)
 
     def resize(self, sender):
-        swm = getDefault("singleWindowMode")
+        SWM = getDefault("singleWindowMode")
         
         fw = CurrentFontWindow()
         fo = fw.fontOverview
@@ -61,25 +60,21 @@ class fitGlyphCells(Subscriber):
         
         # get the width of the whole window
         x, y, w, h = fw.window().getPosSize()
-
-        # get the width of the cell view
-        vw, vh = v.frameSize().width, v.frameSize().height
-        
         # get the width of overall font overview
         fo_w = fo.getNSView().frameSize().width
-        
+        # get the width of the cell view
+        vw, vh = v.frameSize().width, v.frameSize().height
         # get the width of the sets menu to the left of the font overview
         sets_w = fo_w - vw
-        
         # get number of glyphs
         num_g = len(fo.getGlyphOrder())
         
-        # debug
-        print("vw ",  vw)
-        print("vh ",  vh)
-        print("num g ",  num_g)
-        print("w ", sets_w)
-        print("sets_w ", sets_w)
+        # # debug
+        # print("vw ",  vw)
+        # print("vh ",  vh)
+        # print("num g ",  num_g)
+        # print("w ", sets_w)
+        # print("sets_w ", sets_w)
         
         cells_across = 1
         cw = int(vw / cells_across)
@@ -88,18 +83,18 @@ class fitGlyphCells(Subscriber):
             cw = ch = int(vw / cells_across)
     
         vw = cw * cells_across
-        
-        # debug
-        print()
-        print("cells across ",  cells_across)
-        print("cw ",  cw)
-        print("ch ",  ch)
-        print("vw ", vw)
-        print("sets_w ", sets_w)
         fo_total_w = vw + sets_w
         
+        # # debug
+        # print()
+        # print("cells across ",  cells_across)
+        # print("cw ",  cw)
+        # print("ch ",  ch)
+        # print("vw ", vw)
+        # print("sets_w ", sets_w)
+        
         # set frame size
-        if swm == 1:
+        if SWM == 1:
             fw.editor.splitView.setDimension('fontOverview', fo_total_w)
             fw.editor.splitView.setDimension('glyphView', w - fo_total_w)
             fw.centerGlyphInView()
@@ -109,10 +104,9 @@ class fitGlyphCells(Subscriber):
             x_diff = w - vw
             windows[0].setFrame_display_animate_(((x + x_diff, y), (fo_total_w, h)), True, False)
     
-        # do it
+        # do it!
         v.setCellSize_([cw, ch])
         fo.views.sizeSlider.set(cw)
         setDefault("fontCollectionViewGlyphSize", int(cw))
-        
         
 registerFontOverviewSubscriber(fitGlyphCells)
