@@ -1,52 +1,52 @@
 import os
 from AppKit import NSApp
 import math
-from mojo.events import addObserver
-from mojo.UI import CurrentFontWindow
-from lib.tools.defaults import getDefault
 from vanilla import ImageButton
+from mojo.UI import CurrentFontWindow, getDefault, setDefault
+from mojo.subscriber import Subscriber, registerFontOverviewSubscriber
 
-class fitGlyphCells(object):
+
+fit_resources_path = os.path.abspath("./resources/")
+
+class fitGlyphCells(Subscriber):
     
     '''
     Scale the glyph cells in Font Overview as large as 
     they can be while justfied to the width of the frame.
+    Happens on `Open` now.
     
     Ryan Bugden
     2020.04.03
     '''
 
-    def __init__(self):
+    def started(self):
         self.i = 0
-        self.resources_path = os.path.abspath("./resources")
-        addObserver(self, "addButton", "fontWindowDidOpen")
-        addObserver(self, "menu", "fontOverviewAdditionContextualMenuItems")
+        self.resize(None)
 
-    def addButton(self, notification):
-        self.sb = CurrentFontWindow().fontOverview.statusBar
-        path = self.resources_path + '/_icon_Fit.pdf'
+    def fontOverviewDidOpen(self, info):
+        # add button
+        self.sb = info["fontOverview"].statusBar
+        
+        path = os.path.join(fit_resources_path, '_icon_Fit.pdf')
 
-        fitButton = ImageButton(
+        if hasattr(self.sb, 'fit_button'):
+            del self.sb.fit_button
+            
+        self.sb.fit_button = ImageButton(
             (-122, -19, 18, 18), 
             imagePath = path,
             callback = self.resize, 
             sizeStyle = 'regular'
             )
-        fitButton.getNSButton().setBordered_(0)
-        fitButton.getNSButton().setBezelStyle_(2)
-        
-        setattr(
-            self.sb,
-            'fit_button_%s' % self.i,
-            fitButton)
-                
-        self.i += 1
+        self.sb.fit_button.getNSButton().setBordered_(0)
+        self.sb.fit_button.getNSButton().setBezelStyle_(2)
 
-    def menu(self, notification):
+    def fontOverviewWantsContextualMenuItems(self, info):
+        # add contextual menu item
         myMenuItems = [
             ("Fit all glyphs in overview", self.resize)
         ]
-        notification["additionContextualMenuItems"].extend(myMenuItems)
+        info["itemDescriptions"].extend(myMenuItems)
 
     def resize(self, sender):
         fw = CurrentFontWindow()
@@ -62,11 +62,12 @@ class fitGlyphCells(object):
         
         # get number of glyphs
         num_g = len(fo.getGlyphOrder())
-
-        # print("vw ",  vw)
-        # print("vh ",  vh)
-        # print("num g ",  num_g)
-
+        
+        # debug
+        print("vw ",  vw)
+        print("vh ",  vh)
+        print("num g ",  num_g)
+        
         cells_across = 1
         cw = int(vw / cells_across)
         while ((num_g) / cells_across) * cw > vh:
@@ -74,11 +75,12 @@ class fitGlyphCells(object):
             cw = ch = int(vw / cells_across)
     
         vw = cw * cells_across
-
-        # print("cells across ",  cells_across)
-        # print("cw ",  cw)
-        # print("ch ",  ch)
-        # print("vw ", vw)
+        
+        # debug
+        print("cells across ",  cells_across)
+        print("cw ",  cw)
+        print("ch ",  ch)
+        print("vw ", vw)
         
         # set frame size
         if getDefault("singleWindowMode") == 1:
@@ -95,5 +97,7 @@ class fitGlyphCells(object):
         # do it
         v.setCellSize_([cw, ch])
         fo.views.sizeSlider.set(cw)
+        setDefault("fontCollectionViewGlyphSize", int(cw))
         
-fitGlyphCells()
+        
+registerFontOverviewSubscriber(fitGlyphCells)
