@@ -99,7 +99,7 @@ class fitGlyphCells(Subscriber):
 		# get the width of the sets menu to the left of the font overview
 		sets_w = fo_w - vw
 		# get number of glyphs
-		num_g = len(fo.getGlyphOrder())
+		num_g = len(gc.getGlyphNames())
 		
 		# # debug
 		# print("vw ",  vw)
