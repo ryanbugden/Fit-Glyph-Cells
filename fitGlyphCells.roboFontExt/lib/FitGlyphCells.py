@@ -24,7 +24,7 @@ class fitGlyphCells(Subscriber):
 		self.startupSetting = getExtensionDefault(self.key, fallback = 1)
 		
 		# put in the menu item
-		title = "Fit Glyph Cells on Startup"
+		title = "Fit Glyph Cells on Open"
 		fontMenu = NSApp().mainMenu().itemWithTitle_("Font")
 		if not fontMenu:
 			print("Fit Glyph Cells - Error")
