@@ -14,12 +14,9 @@ class fitGlyphCells(Subscriber):
 	
 	'''
 	Scale the glyph cells in Font Overview as large as 
-	they can be while justfied to the width of the frame.
-	Happens on `Open` now.
+	they can be while justified to the width of the frame.
 	
 	Ryan Bugden
-	2020.04.03
-	2022.01.25 - Extension
 	'''
 	
 	def build(self):
@@ -84,7 +81,8 @@ class fitGlyphCells(Subscriber):
 		
 		fw = CurrentFontWindow()
 		fo = fw.fontOverview
-		v = fo.getGlyphCollection().getGlyphCellView()
+		gc = fo.getGlyphCollection()
+		v = gc.getGlyphCellView()
 
 		# make cells small first
 		starter = 10
@@ -101,13 +99,6 @@ class fitGlyphCells(Subscriber):
 		# get number of glyphs
 		num_g = len(gc.getGlyphNames())
 		
-		# # debug
-		# print("vw ",  vw)
-		# print("vh ",  vh)
-		# print("num g ",  num_g)
-		# print("w ", sets_w)
-		# print("sets_w ", sets_w)
-		
 		cells_across = 1
 		cw = int(vw / cells_across)
 		while ((num_g) / cells_across) * cw > vh:
@@ -117,28 +108,22 @@ class fitGlyphCells(Subscriber):
 		vw = cw * cells_across
 		fo_total_w = vw + sets_w
 		
-		# # debug
-		# print()
-		# print("cells across ",  cells_across)
-		# print("cw ",  cw)
-		# print("ch ",  ch)
-		# print("vw ", vw)
-		# print("sets_w ", sets_w)
-		
-		# set frame size
+		# set frame size in single window mode
 		if SWM == 1:
 			fw.editor.splitView.setDimension('fontOverview', fo_total_w)
 			fw.editor.splitView.setDimension('glyphView', w - fo_total_w)
 			fw.centerGlyphInView()
+		# set frame size in multi-window mode
 		else:
 			windows = NSApp().orderedWindows()
 			(x, y), (w, h) =  windows[0].frame()
-			x_diff = w - vw
+			x_diff = w - fo_total_w
 			windows[0].setFrame_display_animate_(((x + x_diff, y), (fo_total_w, h)), True, False)
 	
 		# do it!
 		v.setCellSize_([cw, ch])
 		fo.views.sizeSlider.set(cw)
+		# set this as the new default cell size (this happens when you use the native slide too)
 		setDefault("fontCollectionViewGlyphSize", int(cw))
 		
 registerFontOverviewSubscriber(fitGlyphCells)
