@@ -26,21 +26,21 @@ class fitGlyphCells(Subscriber):
 		
 		# put in the menu item
 		title = "Fit Glyph Cells on Open"
-		fontMenu = NSApp().mainMenu().itemWithTitle_("Font")
-		if not fontMenu:
+		font_menu = NSApp().mainMenu().itemWithTitle_("Font")
+		if not font_menu:
 			print("Fit Glyph Cells - Error")
 			return
-		fontMenu = fontMenu.submenu()
-		if fontMenu.itemWithTitle_(title):
+		font_menu = font_menu.submenu()
+		if font_menu.itemWithTitle_(title):
 			return
 			
-		index = fontMenu.indexOfItemWithTitle_("Sort")
+		index = font_menu.indexOfItemWithTitle_("Sort")
 		self.target = CallbackWrapper(self.togglePref)
-		newItem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(title, "action:", "F")
-		newItem.setKeyEquivalentModifierMask_(NSAlternateKeyMask | NSCommandKeyMask)
-		newItem.setTarget_(self.target)
-		newItem.setState_(self.startupSetting)
-		fontMenu.insertItem_atIndex_(newItem, index+1)
+		new_item = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(title, "action:", "F")
+		new_item.setKeyEquivalentModifierMask_(NSAlternateKeyMask | NSCommandKeyMask)
+		new_item.setTarget_(self.target)
+		new_item.setState_(self.startupSetting)
+		font_menu.insertItem_atIndex_(new_item, index+1)
 
 
 	def togglePref(self, sender):
@@ -49,13 +49,11 @@ class fitGlyphCells(Subscriber):
 		self.startupSetting = new_setting
 
 	def fontOverviewDidOpen(self, info):
-
 		# resize the glyph cells
 		if self.startupSetting == 1:
 			self.resize(None)
 
 		# add button
-
 		self.sb = info["fontOverview"].statusBar
 
 		if hasattr(self.sb, 'fit_button'):
@@ -73,7 +71,7 @@ class fitGlyphCells(Subscriber):
 	def fontOverviewWantsContextualMenuItems(self, info):
 		# add contextual menu item
 		myMenuItems = [
-			("Fit all glyphs in overview", self.resize)
+			("Fit glyph cells", self.resize)
 		]
 		info["itemDescriptions"].extend(myMenuItems)
 
@@ -88,7 +86,6 @@ class fitGlyphCells(Subscriber):
 		# make cells small first
 		starter = 10
 		v.setCellSize_([starter, starter])
-		
 		# get the width of the whole window
 		x, y, w, h = fw.window().getPosSize()
 		# get the width of overall font overview
@@ -121,7 +118,7 @@ class fitGlyphCells(Subscriber):
 			x_diff = w - fo_total_w
 			windows[0].setFrame_display_animate_(((x + x_diff, y), (fo_total_w, h)), True, False)
 	
-		# do it!
+		# change the cell size once and for all, update the slider to reflect the change
 		v.setCellSize_([cw, ch])
 		fo.views.sizeSlider.set(cw)
 		# set this as the new default cell size (this happens when you use the native slide too)
