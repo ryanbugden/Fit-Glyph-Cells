@@ -4,11 +4,11 @@ import math
 from vanilla import ImageButton
 from mojo.tools import CallbackWrapper
 from mojo.UI import CurrentFontWindow, getDefault, setDefault
-from mojo.extensions import getExtensionDefault, setExtensionDefault
+from mojo.extensions import ExtensionBundle, getExtensionDefault, setExtensionDefault
 from mojo.subscriber import Subscriber, registerFontOverviewSubscriber
 
-
-fit_resources_path = os.path.abspath("./resources/")
+bundle = ExtensionBundle(path="../../fitGlyphCells.roboFontExt")
+icon = bundle.getResourceImage("_icon_Fit")
 
 class fitGlyphCells(Subscriber):
 	
@@ -20,6 +20,7 @@ class fitGlyphCells(Subscriber):
 	'''
 	
 	def build(self):
+
 		self.key = 'com.ryanbugden.FitGlyphCells.FitOnStartup'
 		self.startupSetting = getExtensionDefault(self.key, fallback = 1)
 		
@@ -40,11 +41,7 @@ class fitGlyphCells(Subscriber):
 		newItem.setTarget_(self.target)
 		newItem.setState_(self.startupSetting)
 		fontMenu.insertItem_atIndex_(newItem, index+1)
-		
-	def started(self):
-		# resize the glyph cells
-		if self.startupSetting == 1:
-			self.resize(None)
+
 
 	def togglePref(self, sender):
 		new_setting = not(self.startupSetting)
@@ -52,17 +49,21 @@ class fitGlyphCells(Subscriber):
 		self.startupSetting = new_setting
 
 	def fontOverviewDidOpen(self, info):
+
+		# resize the glyph cells
+		if self.startupSetting == 1:
+			self.resize(None)
+
 		# add button
+
 		self.sb = info["fontOverview"].statusBar
-		
-		path = os.path.join(fit_resources_path, '_icon_Fit.pdf')
 
 		if hasattr(self.sb, 'fit_button'):
 			del self.sb.fit_button
 			
 		self.sb.fit_button = ImageButton(
 			(-122, -19, 18, 18), 
-			imagePath = path,
+			imageObject = icon,
 			callback = self.resize, 
 			sizeStyle = 'regular'
 			)
