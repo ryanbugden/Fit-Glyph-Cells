@@ -67,6 +67,7 @@ class fitGlyphCells(Subscriber):
 			)
 		self.sb.fit_button.getNSButton().setBordered_(0)
 		self.sb.fit_button.getNSButton().setBezelStyle_(2)
+		self.sb.fit_button.getNSButton().image().setTemplate_(True)
 
 	def fontOverviewWantsContextualMenuItems(self, info):
 		# add contextual menu item
