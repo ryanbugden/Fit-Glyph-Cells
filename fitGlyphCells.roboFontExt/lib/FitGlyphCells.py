@@ -99,7 +99,7 @@ class fitGlyphCells(Subscriber):
 		num_g = len(gc.getGlyphNames())
 		
 		cells_across = 1
-		cw = int(vw / cells_across)
+		cw = ch = int(vw / cells_across)
 		while ((num_g) / cells_across) * cw > vh:
 			cells_across += 1
 			cw = ch = int(vw / cells_across)
