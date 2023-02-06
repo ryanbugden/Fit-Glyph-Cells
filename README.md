@@ -20,6 +20,7 @@ The setting below resizes the glyph cells to fit, every time you start a new UFO
 ### Versions
 
 ```
+2023.02.06  Fix minor bug
 2022.01.25  Extension release
 2020.04.03  Initial start-up script release
 ```	
