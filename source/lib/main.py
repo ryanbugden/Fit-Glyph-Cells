@@ -23,9 +23,9 @@ def calculate_cells_per_row(cell_count, view_width, view_height):
     """
     def fits(cells_per_row):
         total_rows = math.ceil(cell_count / cells_per_row)
-        cell_width = view_width / cells_per_row
-        collection_height = total_rows * cell_width
-        return collection_height - (getExtensionDefault(FGC_EXTENSION_KEY)["allowance"] * cell_width) <= view_height 
+        cell_size = view_width / cells_per_row
+        collection_height = total_rows * cell_size
+        return collection_height <= view_height 
     cells_per_row = 1
     while not fits(cells_per_row):
         cells_per_row += 1
@@ -37,7 +37,7 @@ def get_view_dimensions(font_window):
     """
     x, y, window_width, h = font_window.window().getPosSize()
     font_overview = font_window.fontOverview
-    font_overview_width = font_overview.getNSView().frameSize().width
+    font_overview_width, font_overview_height = font_overview.getNSView().frameSize().width, font_overview.getNSView().frameSize().height
     
     glyph_collection = font_overview.getGlyphCollection()
     cell_view = glyph_collection.getGlyphCellView()
@@ -48,9 +48,9 @@ def get_view_dimensions(font_window):
     view_width, view_height = cell_view.frameSize().width, cell_view.frameSize().height
     sets_menu_width = font_overview_width - view_width
     
-    return view_width, view_height, font_overview_width, sets_menu_width, window_width
+    return view_width, view_height, font_overview_width, font_overview_height, sets_menu_width, window_width
 
-def adjust_window_layout(font_window, desired_overview_width):
+def adjust_window(font_window, width_diff, height_diff):
     """
     Adjust the window layout based on single/multi-window mode.
     """
@@ -58,15 +58,14 @@ def adjust_window_layout(font_window, desired_overview_width):
     
     if is_single_window:
         window_width = font_window.window().getPosSize()[2]
-        font_window.editor.splitView.setDimension('fontOverview', desired_overview_width)
-        font_window.editor.splitView.setDimension('glyphView', window_width - desired_overview_width)
+        font_window.editor.splitView.setDimension('fontOverview', width)
+        font_window.editor.splitView.setDimension('glyphView', window_width - width)
         font_window.centerGlyphInView()
     else:
         window = font_window.window().getNSWindow()
         (x, y), (w, h) = window.frame()
-        x_diff = w - desired_overview_width
         window.setFrame_display_animate_(
-            ((x + x_diff, y), (desired_overview_width, h)), True, False
+            ((x - width_diff, y), (w + width_diff, h - height_diff)), True, False
         )
 
 
@@ -114,7 +113,7 @@ class FitGlyphCells(Subscriber):
                 return
 
         # Get view dimensions
-        view_width, view_height, fo_width, sets_width, window_width = get_view_dimensions(font_window)
+        view_width, view_height, fo_width, fo_height, sets_width, window_width = get_view_dimensions(font_window)
     
         # Calculate grid layout
         font_overview = font_window.fontOverview
@@ -123,23 +122,33 @@ class FitGlyphCells(Subscriber):
         num_glyphs = len(glyph_collection.getGlyphNames())
     
         cols = calculate_cells_per_row(num_glyphs, view_width, view_height)
-        cell_width = math.floor(view_width / cols)
+        cell_size = math.floor(view_width / cols)
         max_cell_size = getExtensionDefault(FGC_EXTENSION_KEY)["maxCellSize"]
-        if max_cell_size > 0 and max_cell_size < cell_width:
-            cell_width = max_cell_size
-        desired_view_width = cell_width * cols
-        desired_overview_width = desired_view_width + sets_width
+        if max_cell_size > 0 and max_cell_size < cell_size:
+            cell_size = max_cell_size
+        rows = math.ceil(num_glyphs / cols)
+        new_view_width = cell_size * cols
+        new_view_height = cell_size * rows
     
         # Update view sizes
-        cell_view.setCellSize_([cell_width, cell_width])
-        font_overview.views.sizeSlider.set(cell_width)
-        setDefault("fontCollectionViewGlyphSize", cell_width)
+        cell_view.setCellSize_([cell_size, cell_size])
+        font_overview.views.sizeSlider.set(cell_size)
+        setDefault("fontCollectionViewGlyphSize", cell_size)
     
         # Adjust window layout
-        adjust_window_layout(
-            font_window, 
-            desired_overview_width
-        )
+        adjust_width, adjust_height = getExtensionDefault(FGC_EXTENSION_KEY)["allowWidthAdjust"], getExtensionDefault(FGC_EXTENSION_KEY)["allowHeightAdjust"]
+        print(getExtensionDefault(FGC_EXTENSION_KEY)["allowWidthAdjust"], getExtensionDefault(FGC_EXTENSION_KEY)["allowHeightAdjust"])
+        if adjust_width or adjust_height:
+            width_diff, height_diff = 0, 0
+            if adjust_width:
+                width_diff = (new_view_width + sets_width) - view_width
+            if adjust_height:
+                height_diff = view_height - new_view_height
+            adjust_window(
+                font_window, 
+                width_diff,
+                height_diff
+            )
         
         
 registerFontOverviewSubscriber(FitGlyphCells)
