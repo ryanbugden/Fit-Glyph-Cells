@@ -34,7 +34,7 @@ This setting resizes glyph cells every time you open a Font Overview window, whe
 
 ### Adjust Window
 
-Cell sizes must be nice, round integers, but window widths can be decimals. This means that for snug fitting to be possible, the window will have to resize. In this setting, select whether you’re willing to let the Font Overview window’s width and/or to shift a bit after the cells resize.
+Cell sizes must be nice, round integers, but window widths can be decimals. This means that for snug fitting to be possible, the window will have to resize. In this setting, select whether you’re willing to let the Font Overview window’s width and/or height shift a bit after the cells resize.
 
 ### Max Cell Size
 
