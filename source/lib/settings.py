@@ -18,6 +18,9 @@ class FitGlyphCellsSettings(ezui.WindowController):
         > : Allowance:
         > [_ 0 _]              @allowance
         
+        > : Max Cell Size:
+        > [_ 99 _]             @maxCellSize
+        
         ---
         
         (Reset Defaults)       @resetDefaultsButton
@@ -33,6 +36,13 @@ class FitGlyphCellsSettings(ezui.WindowController):
                 valueType="float",
                 value=0,
                 valueIncrement=0.1,
+                valueWidth=50,
+            ),
+            maxCellSize=dict(
+                valueType="integer",
+                value=99,
+                minValue=0,
+                valueIncrement=1,
                 valueWidth=50,
             ),
             resetDefaultsButton=dict(

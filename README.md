@@ -10,7 +10,7 @@ It sizes the glyph cells such that they’re as large as possible, while all bei
 
 Glyph cells will resize to be flush up against both sides of the font overview, but with minimal empty space below.
 
-Font Overview window’s width also slightly changes, because its width value can be a decimal while glyph cell size cannot.
+> Note: Font Overview window’s width also slightly changes, because its width value can be a decimal while glyph cell size cannot.
 
 ## Ways to use
 
@@ -41,6 +41,16 @@ This is how much you’re willing to allow the glyph cells to go below the botto
 * `0` = Don’t allow my glyph cells to overflow.
 * `0.5` = Allow a half-row to overflow.
 * `2` = Allow two rows to overflow.
+
+### Max Cell Size
+
+This is the maximum size you’ll allow the cells to get when fitting. For example:
+
+* `0` = No maximum.
+* `89` = Don’t enlarge to the point where font dimensions show.
+* `99` = Don’t enlarge to the point where layers show.
+
+> Note: The window will still attempt to resize and fit against the cells.
 
 
 

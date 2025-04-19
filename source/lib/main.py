@@ -124,6 +124,9 @@ class FitGlyphCells(Subscriber):
     
         cols = calculate_cells_per_row(num_glyphs, view_width, view_height)
         cell_width = math.floor(view_width / cols)
+        max_cell_size = getExtensionDefault(FGC_EXTENSION_KEY)["maxCellSize"]
+        if max_cell_size > 0 and max_cell_size < cell_width:
+            cell_width = max_cell_size
         desired_view_width = cell_width * cols
         desired_overview_width = desired_view_width + sets_width
     
