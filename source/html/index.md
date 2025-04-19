@@ -1,4 +1,4 @@
-<img src="source/resources/mechanic_icon.png"  width="80">
+<img src="../resources/mechanic_icon.png"  width="80">
 
 # Fit Glyph Cells
 
@@ -7,11 +7,11 @@ A RoboFont extension that places a button to the left of the glyph cell size sli
 *Note:
 Font Overview window’s width also slightly changes, because its width value can be a decimal while glyph cell size cannot.*
 
-![](./source/resources/demo.png)
+![](./../resources/demo.png)
 
 The setting below resizes the glyph cells to fit, every time you start a new UFO or open an existing file:
 
-![](./source/resources/settings.png)
+![](./../resources/settings.png)
 
 
 ### Known issues:

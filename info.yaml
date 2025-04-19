@@ -1,0 +1,11 @@
+name: Fit Glyph Cells
+developer: Ryan Bugden
+developerURL: https://ryanbugden.com
+launchAtStartUp: true
+mainScript: main.py
+version: 1.3
+addToMenu: []
+html: true
+timeStamp: 1745093882
+requiresVersionMajor: '4'
+requiresVersionMinor: '0'

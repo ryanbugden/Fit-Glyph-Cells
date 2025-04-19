@@ -7,10 +7,12 @@ from mojo.UI import CurrentFontWindow, getDefault, setDefault
 from mojo.extensions import ExtensionBundle, getExtensionDefault, setExtensionDefault
 from mojo.subscriber import Subscriber, registerFontOverviewSubscriber
 
-bundle = ExtensionBundle(path="../../fitGlyphCells.roboFontExt")
-icon = bundle.getResourceImage("_icon_Fit")
 
-class fitGlyphCells(Subscriber):
+bundle = ExtensionBundle("Fit Glyph Cells")
+icon = bundle.getResourceImage("icon")
+
+
+class FitGlyphCells(Subscriber):
 	
 	'''
 	Scale the glyph cells in Font Overview as large as 
@@ -125,4 +127,5 @@ class fitGlyphCells(Subscriber):
 		# set this as the new default cell size (this happens when you use the native slide too)
 		setDefault("fontCollectionViewGlyphSize", int(cw))
 		
-registerFontOverviewSubscriber(fitGlyphCells)
+		
+registerFontOverviewSubscriber(FitGlyphCells)
