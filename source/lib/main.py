@@ -1,15 +1,12 @@
-import os
-from AppKit import NSApp, NSMenuItem, NSAlternateKeyMask, NSCommandKeyMask
 import math
 from vanilla import ImageButton
-from mojo.tools import CallbackWrapper
 from mojo.UI import CurrentFontWindow, getDefault, setDefault
-from mojo.extensions import ExtensionBundle, getExtensionDefault, setExtensionDefault
+from mojo.extensions import ExtensionBundle, getExtensionDefault
 from mojo.subscriber import Subscriber, registerFontOverviewSubscriber
 import importlib
 import defaults
 importlib.reload(defaults)
-from defaults import FGC_EXTENSION_KEY, FGC_EXTENSION_DEFAULTS
+from defaults import FGC_EXTENSION_KEY
 
 
 BUNDLE = ExtensionBundle("Fit Glyph Cells")
