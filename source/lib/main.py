@@ -50,16 +50,17 @@ def get_view_dimensions(font_window):
     
     return view_width, view_height, font_overview_width, font_overview_height, sets_menu_width, window_width
 
-def adjust_window(font_window, width_diff, height_diff):
+def adjust_window(font_window, width_diff, height_diff, view_width, window_width):
     """
     Adjust the window layout based on single/multi-window mode.
     """
-    is_single_window = getDefault("singleWindowMode") == 1
+    is_single_window = getDefault("singleWindowMode")
     
     if is_single_window:
-        window_width = font_window.window().getPosSize()[2]
-        font_window.editor.splitView.setDimension('fontOverview', width)
-        font_window.editor.splitView.setDimension('glyphView', window_width - width)
+        new_fo_w = view_width + width_diff
+        new_window_width = window_width - new_fo_w
+        font_window.editor.splitView.setDimension('fontOverview', new_fo_w)
+        font_window.editor.splitView.setDimension('glyphView', new_window_width)
         font_window.centerGlyphInView()
     else:
         window = font_window.window().getNSWindow()
@@ -137,7 +138,6 @@ class FitGlyphCells(Subscriber):
     
         # Adjust window layout
         adjust_width, adjust_height = getExtensionDefault(FGC_EXTENSION_KEY)["allowWidthAdjust"], getExtensionDefault(FGC_EXTENSION_KEY)["allowHeightAdjust"]
-        print(getExtensionDefault(FGC_EXTENSION_KEY)["allowWidthAdjust"], getExtensionDefault(FGC_EXTENSION_KEY)["allowHeightAdjust"])
         if adjust_width or adjust_height:
             width_diff, height_diff = 0, 0
             if adjust_width:
@@ -147,7 +147,10 @@ class FitGlyphCells(Subscriber):
             adjust_window(
                 font_window, 
                 width_diff,
-                height_diff
+                height_diff,
+                # Clean this up later
+                view_width,
+                window_width
             )
         
         
