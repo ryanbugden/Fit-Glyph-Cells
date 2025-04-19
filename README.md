@@ -10,8 +10,6 @@ It sizes the glyph cells such that they’re as large as possible, while all bei
 
 Glyph cells will resize to be flush up against both sides of the font overview, but with minimal empty space below.
 
-> Note: Font Overview window’s width also slightly changes, because its width value can be a decimal while glyph cell size cannot.
-
 ## Ways to use
 
 ### Button
@@ -34,13 +32,9 @@ Alternatively, you may right click on the Font Overview and find a Fit Glyph Cel
 
 This setting resizes glyph cells every time you open a Font Overview window, whether it’s a new UFO or an existing one..
 
-### Allowance
+### Adjust Window
 
-This is how much you’re willing to allow the glyph cells to go below the bottom of the window. It’s measured in glyph cell heights. For example:
-
-* `0` = Don’t allow my glyph cells to overflow.
-* `0.5` = Allow a half-row to overflow.
-* `2` = Allow two rows to overflow.
+Cell sizes must be nice, round integers, but window widths can be decimals. This means that for snug fitting to be possible, the window will have to resize. In this setting, select whether you’re willing to let the Font Overview window’s width and/or to shift a bit after the cells resize.
 
 ### Max Cell Size
 

@@ -17,7 +17,7 @@ class FitGlyphCellsSettings(ezui.WindowController):
         
         > : Adjust Window:
         > [X] Width            @allowWidthAdjust
-        > [ ] Height           @allowHeightAdjust
+        > [X] Height           @allowHeightAdjust
         
         > : Max Cell Size:
         > [_ 99 _]             @maxCellSize
