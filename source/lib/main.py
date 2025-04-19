@@ -6,126 +6,137 @@ from mojo.tools import CallbackWrapper
 from mojo.UI import CurrentFontWindow, getDefault, setDefault
 from mojo.extensions import ExtensionBundle, getExtensionDefault, setExtensionDefault
 from mojo.subscriber import Subscriber, registerFontOverviewSubscriber
+import importlib
+import defaults
+importlib.reload(defaults)
+from defaults import FGC_EXTENSION_KEY, FGC_EXTENSION_DEFAULTS
 
 
-bundle = ExtensionBundle("Fit Glyph Cells")
-icon = bundle.getResourceImage("icon")
+BUNDLE = ExtensionBundle("Fit Glyph Cells")
+ICON = BUNDLE.getResourceImage("icon")
+INITIAL_CELL_SIZE = 10
+
+
+def calculate_cells_per_row(cell_count, view_width, view_height):
+    """
+    Calculate the optimal number of cells per row that will fit in the given view dimensions.
+    """
+    def fits(cells_per_row):
+        total_rows = math.ceil(cell_count / cells_per_row)
+        cell_width = view_width / cells_per_row
+        collection_height = total_rows * cell_width
+        return collection_height - (getExtensionDefault(FGC_EXTENSION_KEY)["allowance"] * cell_width) <= view_height 
+    cells_per_row = 1
+    while not fits(cells_per_row):
+        cells_per_row += 1
+    return cells_per_row
+
+def get_view_dimensions(font_window):
+    """
+    Get the dimensions of various views in the font window.
+    """
+    x, y, window_width, h = font_window.window().getPosSize()
+    font_overview = font_window.fontOverview
+    font_overview_width = font_overview.getNSView().frameSize().width
+    
+    glyph_collection = font_overview.getGlyphCollection()
+    cell_view = glyph_collection.getGlyphCellView()
+    
+    # Initialize with small cell size to get accurate frame sizes
+    cell_view.setCellSize_([INITIAL_CELL_SIZE, INITIAL_CELL_SIZE])
+    
+    view_width, view_height = cell_view.frameSize().width, cell_view.frameSize().height
+    sets_menu_width = font_overview_width - view_width
+    
+    return view_width, view_height, font_overview_width, sets_menu_width, window_width
+
+def adjust_window_layout(font_window, desired_overview_width):
+    """
+    Adjust the window layout based on single/multi-window mode.
+    """
+    is_single_window = getDefault("singleWindowMode") == 1
+    
+    if is_single_window:
+        window_width = font_window.window().getPosSize()[2]
+        font_window.editor.splitView.setDimension('fontOverview', desired_overview_width)
+        font_window.editor.splitView.setDimension('glyphView', window_width - desired_overview_width)
+        font_window.centerGlyphInView()
+    else:
+        window = font_window.window().getNSWindow()
+        (x, y), (w, h) = window.frame()
+        x_diff = w - desired_overview_width
+        window.setFrame_display_animate_(
+            ((x + x_diff, y), (desired_overview_width, h)), True, False
+        )
 
 
 class FitGlyphCells(Subscriber):
-	
-	'''
-	Scale the glyph cells in Font Overview as large as 
-	they can be while justified to the width of the frame.
-	
-	Ryan Bugden
-	'''
-	
-	def build(self):
+    '''
+    Scale the glyph cells in Font Overview as large as 
+    they can be while justified to the width of the frame.
+    
+    Ryan Bugden
+    '''
 
-		self.key = 'com.ryanbugden.FitGlyphCells.FitOnStartup'
-		self.startupSetting = getExtensionDefault(self.key, fallback = 1)
-		
-		# put in the menu item
-		title = "Fit Glyph Cells on Open"
-		font_menu = NSApp().mainMenu().itemWithTitle_("Font")
-		if not font_menu:
-			print("Fit Glyph Cells - Error")
-			return
-		font_menu = font_menu.submenu()
-		if font_menu.itemWithTitle_(title):
-			return
-			
-		index = font_menu.indexOfItemWithTitle_("Sort")
-		self.target = CallbackWrapper(self.togglePref)
-		new_item = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(title, "action:", "F")
-		new_item.setKeyEquivalentModifierMask_(NSAlternateKeyMask | NSCommandKeyMask)
-		new_item.setTarget_(self.target)
-		new_item.setState_(self.startupSetting)
-		font_menu.insertItem_atIndex_(new_item, index+1)
+    def fontOverviewWillOpen(self, info):
+        # Add button
+        self.sb = info["fontOverview"].statusBar
+        if hasattr(self.sb, 'fit_button'):
+            del self.sb.fit_button
+        self.sb.fit_button = ImageButton(
+            (-122, -19, 18, 18), 
+            imageObject = ICON,
+            callback = self.fit_glyph_cells, 
+            sizeStyle = 'regular'
+            )
+        self.sb.fit_button.getNSButton().setBordered_(0)
+        self.sb.fit_button.getNSButton().setBezelStyle_(2)
+        self.sb.fit_button.getNSButton().image().setTemplate_(True)
+        
+    def fontDocumentWindowDidOpen(self, info):
+        font_window = info['lowLevelEvents'][0]['window']
+        # Fit the glyph cells, per the setting
+        if getExtensionDefault(FGC_EXTENSION_KEY)["fitOnOpen"]:
+            self.fit_glyph_cells(None, font_window)
 
+    def fontOverviewWantsContextualMenuItems(self, info):
+        """Add contextual menu item."""
+        menu_items = [
+            ("Fit Glyph Cells", self.fit_glyph_cells)
+        ]
+        info["itemDescriptions"].extend(menu_items)
 
-	def togglePref(self, sender):
-		new_setting = not(self.startupSetting)
-		setExtensionDefault(self.key, new_setting)
-		self.startupSetting = new_setting
+    def fit_glyph_cells(self, sender, font_window=None):
+        """Updates the glyph cell sizes and font overview size."""
+        if not font_window:
+            font_window = CurrentFontWindow()
+            if not font_window:
+                return
 
-	def fontOverviewDidOpen(self, info):
-		# resize the glyph cells
-		if self.startupSetting == 1:
-			self.resize(None)
-
-		# add button
-		self.sb = info["fontOverview"].statusBar
-
-		if hasattr(self.sb, 'fit_button'):
-			del self.sb.fit_button
-			
-		self.sb.fit_button = ImageButton(
-			(-122, -19, 18, 18), 
-			imageObject = icon,
-			callback = self.resize, 
-			sizeStyle = 'regular'
-			)
-		self.sb.fit_button.getNSButton().setBordered_(0)
-		self.sb.fit_button.getNSButton().setBezelStyle_(2)
-		self.sb.fit_button.getNSButton().image().setTemplate_(True)
-
-	def fontOverviewWantsContextualMenuItems(self, info):
-		# add contextual menu item
-		myMenuItems = [
-			("Fit glyph cells", self.resize)
-		]
-		info["itemDescriptions"].extend(myMenuItems)
-
-	def resize(self, sender):
-		SWM = getDefault("singleWindowMode")
-		
-		fw = CurrentFontWindow()
-		fo = fw.fontOverview
-		gc = fo.getGlyphCollection()
-		v = gc.getGlyphCellView()
-
-		# make cells small first
-		starter = 10
-		v.setCellSize_([starter, starter])
-		# get the width of the whole window
-		x, y, w, h = fw.window().getPosSize()
-		# get the width of overall font overview
-		fo_w = fo.getNSView().frameSize().width
-		# get the width of the cell view
-		vw, vh = v.frameSize().width, v.frameSize().height
-		# get the width of the sets menu to the left of the font overview
-		sets_w = fo_w - vw
-		# get number of glyphs
-		num_g = len(gc.getGlyphNames())
-		
-		cells_across = 1
-		cw = ch = int(vw / cells_across)
-		while ((num_g) / cells_across) * cw > vh:
-			cells_across += 1
-			cw = ch = int(vw / cells_across)
-	
-		vw = cw * cells_across
-		fo_total_w = vw + sets_w
-		
-		# set frame size in single window mode
-		if SWM == 1:
-			fw.editor.splitView.setDimension('fontOverview', fo_total_w)
-			fw.editor.splitView.setDimension('glyphView', w - fo_total_w)
-			fw.centerGlyphInView()
-		# set frame size in multi-window mode
-		else:
-			windows = NSApp().orderedWindows()
-			(x, y), (w, h) =  windows[0].frame()
-			x_diff = w - fo_total_w
-			windows[0].setFrame_display_animate_(((x + x_diff, y), (fo_total_w, h)), True, False)
-	
-		# change the cell size once and for all, update the slider to reflect the change
-		v.setCellSize_([cw, ch])
-		fo.views.sizeSlider.set(cw)
-		# set this as the new default cell size (this happens when you use the native slide too)
-		setDefault("fontCollectionViewGlyphSize", int(cw))
-		
-		
+        # Get view dimensions
+        view_width, view_height, fo_width, sets_width, window_width = get_view_dimensions(font_window)
+    
+        # Calculate grid layout
+        font_overview = font_window.fontOverview
+        glyph_collection = font_overview.getGlyphCollection()
+        cell_view = glyph_collection.getGlyphCellView()
+        num_glyphs = len(glyph_collection.getGlyphNames())
+    
+        cols = calculate_cells_per_row(num_glyphs, view_width, view_height)
+        cell_width = math.floor(view_width / cols)
+        desired_view_width = cell_width * cols
+        desired_overview_width = desired_view_width + sets_width
+    
+        # Update view sizes
+        cell_view.setCellSize_([cell_width, cell_width])
+        font_overview.views.sizeSlider.set(cell_width)
+        setDefault("fontCollectionViewGlyphSize", cell_width)
+    
+        # Adjust window layout
+        adjust_window_layout(
+            font_window, 
+            desired_overview_width
+        )
+        
+        
 registerFontOverviewSubscriber(FitGlyphCells)
