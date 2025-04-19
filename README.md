@@ -18,7 +18,7 @@ Glyph cells will resize to be flush up against both sides of the font overview, 
 
 This extension places a button to the left of the glyph cell size slider (below Font Overview). Click this to resize the glyph cells.
 
-![](./source/resources/demo.png)
+![](./source/resources/button.png)
 
 ### Right-click
 
