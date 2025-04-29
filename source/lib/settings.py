@@ -57,15 +57,38 @@ class FitGlyphCellsSettings(ezui.WindowController):
             controller=self
         )
         self.w.getNSWindow().setTitlebarAppearsTransparent_(True)
+        
+        # Load preferences with validation
         prefs = getExtensionDefault(FGC_EXTENSION_KEY, fallback=FGC_EXTENSION_DEFAULTS)
-        try: self.w.setItemValues(prefs)
-        except KeyError as e: print(f"Fit Glyph Cells Settings error: {e}")
+        # Ensure all required keys are present
+        for key in FGC_EXTENSION_DEFAULTS:
+            if key not in prefs:
+                prefs[key] = FGC_EXTENSION_DEFAULTS[key]
+        
+        try:
+            self.w.setItemValues(prefs)
+        except KeyError as e:
+            print(f"Fit Glyph Cells Settings error: {e}")
+            # Fall back to defaults if there's an error
+            self.w.setItemValues(FGC_EXTENSION_DEFAULTS)
         
     def started(self):
         self.w.open()
         
     def formCallback(self, sender):
-        setExtensionDefault(FGC_EXTENSION_KEY, self.w.getItemValues())
+        try:
+            current_values = self.w.getItemValues()
+            # Validate all required keys are present before saving
+            for key in FGC_EXTENSION_DEFAULTS:
+                if key not in current_values:
+                    current_values[key] = FGC_EXTENSION_DEFAULTS[key]
+            setExtensionDefault(FGC_EXTENSION_KEY, current_values)
+        except Exception as e:
+            print(f"Error saving preferences: {e}")
+            
+    def windowWillClose(self, sender):
+        # Save preferences when window closes
+        self.formCallback(sender)
         
     def resetDefaultsButtonCallback(self, sender):
         self.w.setItemValues(FGC_EXTENSION_DEFAULTS)

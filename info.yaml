@@ -9,6 +9,5 @@ addToMenu:
   preferredName: Settings...
   shortKey: ""
 html: true
-timeStamp: 1745093882
 requiresVersionMajor: '4'
 requiresVersionMinor: '0'
