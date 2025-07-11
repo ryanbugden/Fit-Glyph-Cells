@@ -1,17 +1,20 @@
 import math
 from vanilla import ImageButton
 from mojo.UI import CurrentFontWindow, getDefault, setDefault
-from mojo.extensions import ExtensionBundle, getExtensionDefault
+from mojo.extensions import ExtensionBundle, getExtensionDefault, setExtensionDefault
 from mojo.subscriber import Subscriber, registerFontOverviewSubscriber
 import importlib
 import defaults
 importlib.reload(defaults)
-from defaults import FGC_EXTENSION_KEY
+from defaults import FGC_EXTENSION_KEY, FGC_EXTENSION_DEFAULTS
 
 
 BUNDLE = ExtensionBundle("Fit Glyph Cells")
 ICON = BUNDLE.getResourceImage("icon")
 INITIAL_CELL_SIZE = 10
+# Set defaults if they don't exist
+if not getExtensionDefault(FGC_EXTENSION_KEY):
+    setExtensionDefault(FGC_EXTENSION_KEY, FGC_EXTENSION_DEFAULTS)
 
 
 def calculate_cells_per_row(cell_count, view_width, view_height):
