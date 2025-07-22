@@ -141,7 +141,7 @@ class FitGlyphCells(Subscriber):
         if adjust_width or adjust_height:
             width_diff, height_diff = 0, 0
             if adjust_width:
-                width_diff = (new_view_width + sets_width) - view_width
+                width_diff = (new_view_width + sets_width) - (view_width + sets_width)
             if adjust_height:
                 height_diff = view_height - new_view_height
             adjust_window(
