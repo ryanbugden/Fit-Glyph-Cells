@@ -73,7 +73,7 @@ def adjust_window(font_window, width_diff, height_diff, view_width, window_width
         # Avoid making window too small
         if w + width_diff < 400:  
             width_diff = 400 - w
-        if h + height_diff < 350:  
+        if h + height_diff < 338:  
             height_diff = 338 - h
         window.setFrame_display_animate_(
             ((x - width_diff, y), (w + width_diff, h + height_diff)), True, False
@@ -126,7 +126,7 @@ class FitGlyphCells(Subscriber):
 
         # Get view dimensions
         view_width, view_height, fo_width, fo_height, sets_width, window_width = get_view_dimensions(font_window)
-    
+
         # Calculate grid layout
         font_overview = font_window.fontOverview
         glyph_collection = font_overview.getGlyphCollection()
@@ -152,7 +152,7 @@ class FitGlyphCells(Subscriber):
         if adjust_width or adjust_height:
             width_diff, height_diff = 0, 0
             if adjust_width:
-                width_diff = (new_view_width + sets_width) - (view_width + sets_width)
+                width_diff  = new_view_width - view_width
             if adjust_height:
                 height_diff = new_view_height - view_height
             adjust_window(

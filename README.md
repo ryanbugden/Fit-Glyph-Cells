@@ -46,6 +46,9 @@ This is the maximum size you’ll allow the cells to get when fitting. For examp
 
 > Note: The window will still attempt to resize and fit against the cells.
 
+### Contextual Menu
+
+Toggle this on if you’d like "Fit Glyph Cells" to show up in the menu when you right click in Font Overview.
 
 
 ## Known issues:
