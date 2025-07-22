@@ -13,7 +13,7 @@ BUNDLE = ExtensionBundle("Fit Glyph Cells")
 ICON = BUNDLE.getResourceImage("icon")
 INITIAL_CELL_SIZE = 10
 # Set defaults if they don't exist
-if not getExtensionDefault(FGC_EXTENSION_KEY):
+if not getExtensionDefault(FGC_EXTENSION_KEY) or False in [key in getExtensionDefault(FGC_EXTENSION_KEY) for key in FGC_EXTENSION_DEFAULTS]:
     setExtensionDefault(FGC_EXTENSION_KEY, FGC_EXTENSION_DEFAULTS)
 
 
@@ -67,11 +67,16 @@ def adjust_window(font_window, width_diff, height_diff, view_width, window_width
         font_window.editor.splitView.setDimension('fontOverview', new_fo_w)
         font_window.editor.splitView.setDimension('glyphView', new_window_width)
         font_window.centerGlyphInView()
-    else:
+    else:    
         window = font_window.window().getNSWindow()
         (x, y), (w, h) = window.frame()
+        # Avoid making window too small
+        if w + width_diff < 400:  
+            width_diff = 400 - w
+        if h + height_diff < 350:  
+            height_diff = 338 - h
         window.setFrame_display_animate_(
-            ((x - width_diff, y), (w + width_diff, h - height_diff)), True, False
+            ((x - width_diff, y), (w + width_diff, h + height_diff)), True, False
         )
 
 
@@ -149,7 +154,7 @@ class FitGlyphCells(Subscriber):
             if adjust_width:
                 width_diff = (new_view_width + sets_width) - (view_width + sets_width)
             if adjust_height:
-                height_diff = view_height - new_view_height
+                height_diff = new_view_height - view_height
             adjust_window(
                 font_window, 
                 width_diff,
