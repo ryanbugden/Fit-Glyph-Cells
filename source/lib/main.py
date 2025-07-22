@@ -31,6 +31,7 @@ def calculate_cells_per_row(cell_count, view_width, view_height):
         cells_per_row += 1
     return cells_per_row
 
+
 def get_view_dimensions(font_window):
     """
     Get the dimensions of various views in the font window.
@@ -43,12 +44,16 @@ def get_view_dimensions(font_window):
     cell_view = glyph_collection.getGlyphCellView()
     
     # Initialize with small cell size to get accurate frame sizes
-    cell_view.setCellSize_([INITIAL_CELL_SIZE, INITIAL_CELL_SIZE])
+    try:
+        cell_view.setCellSize_([INITIAL_CELL_SIZE, INITIAL_CELL_SIZE])
+    except KeyError as e:
+        print(f"Fit Glyph Cells: KeyError in setCellSize_: {e}")
     
     view_width, view_height = cell_view.frameSize().width, cell_view.frameSize().height
     sets_menu_width = font_overview_width - view_width
     
     return view_width, view_height, font_overview_width, font_overview_height, sets_menu_width, window_width
+
 
 def adjust_window(font_window, width_diff, height_diff, view_width, window_width):
     """
