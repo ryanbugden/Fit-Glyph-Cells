@@ -22,11 +22,14 @@ class FitGlyphCellsSettings(ezui.WindowController):
         > : Max Cell Size:
         > [_ 99 _]             @maxCellSize
         
+        > : Contextual Menu:
+        > [X]                  @addToContextualMenu
+        
         ---
         
         (Reset Defaults)       @resetDefaultsButton
         """
-        title_column_width = 100
+        title_column_width = 110
         item_column_width = 70
         descriptionData = dict(
             form=dict(

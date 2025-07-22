@@ -101,10 +101,11 @@ class FitGlyphCells(Subscriber):
 
     def fontOverviewWantsContextualMenuItems(self, info):
         """Add contextual menu item."""
-        menu_items = [
-            ("Fit Glyph Cells", self.fit_glyph_cells)
-        ]
-        info["itemDescriptions"].extend(menu_items)
+        if getExtensionDefault(FGC_EXTENSION_KEY)["addToContextualMenu"]:
+            menu_items = [
+                ("Fit Glyph Cells", self.fit_glyph_cells)
+            ]
+            info["itemDescriptions"].extend(menu_items)
 
     def fit_glyph_cells(self, sender, font_window=None):
         """Updates the glyph cell sizes and font overview size."""
